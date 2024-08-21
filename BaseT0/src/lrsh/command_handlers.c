@@ -3,11 +3,30 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
-#include <stdbool.h> // Add this line
+#include <stdbool.h>
 
 #include "command_handlers.h"
 
-// Función para verificar si un número es primo (repetida aquí para la modularización)
+void handle_lrexec_command(char **args)
+{
+  pid_t pid = fork();
+  if (pid == -1)
+  {
+    perror("fork failed");
+    exit(1);
+  }
+  else if (pid == 0)
+  {
+    execvp(args[0], args);
+    perror("exec failed");
+    exit(1);
+  }
+  else
+  {
+    wait(NULL);
+  }
+}
+
 bool is_prime(int num)
 {
   if (num <= 1)
@@ -34,9 +53,8 @@ void handle_hello_command()
   }
   else if (pid == 0)
   {
-    // Proceso hijo
     printf("Hello World!\n");
-    exit(0); // Terminar el proceso hijo
+    exit(0);
   }
 }
 
@@ -50,12 +68,11 @@ void handle_sum_command(char *arg1, char *arg2)
   }
   else if (pid == 0)
   {
-    // Proceso hijo
     double num1 = atof(arg1);
     double num2 = atof(arg2);
     double result = num1 + num2;
     printf("Result: %.2f\n", result);
-    exit(0); // Terminar el proceso hijo
+    exit(0);
   }
 }
 
@@ -69,7 +86,6 @@ void handle_is_prime_command(char *arg)
   }
   else if (pid == 0)
   {
-    // Proceso hijo
     int num = atoi(arg);
     if (is_prime(num))
     {
@@ -79,6 +95,6 @@ void handle_is_prime_command(char *arg)
     {
       printf("%d is not a prime number.\n", num);
     }
-    exit(0); // Terminar el proceso hijo
+    exit(0);
   }
 }

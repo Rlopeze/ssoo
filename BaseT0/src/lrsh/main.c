@@ -46,6 +46,10 @@ int main()
     {
       handle_is_prime_command(tokens[1]);
     }
+    else if (strcmp(tokens[0], "lrexec") == 0 && tokens[1] != NULL)
+    {
+      handle_lrexec_command(&tokens[1]);
+    }
     else if (strcmp(tokens[0], "exit") == 0)
     {
       free_user_input(tokens);
