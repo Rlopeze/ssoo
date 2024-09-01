@@ -8,18 +8,19 @@
 
 #include "command_handlers.h"
 
+// lrexec was based on the video from this class: https://www.youtube.com/watch?v=aqa7YBiGJxU&list=PLVTkEjeczcER2aOMHPIfaHCpTx61iKsoV&index=9
 void handle_lrexec_command(char **args, Information *process_list, int *process_count)
 {
   pid_t pid = fork();
-  if (pid == -1)
+  if (pid < 0)
   {
-    perror("fork failed");
+    fprintf(stderr, "fork failed");
     exit(1);
   }
   else if (pid == 0)
   {
     execvp(args[0], args);
-    perror("exec failed");
+    fprintf(stderr, "execvp failed");
     exit(1);
   }
   else
@@ -37,13 +38,13 @@ void handle_lrexec_command(char **args, Information *process_list, int *process_
 
 void handle_lrlist_command(Information *process_list, int process_count)
 {
-  printf("PID\t\tName\t\tTime (s)\tExit Code\tRunning\n");
+  printf("PID\t\tName\t\tTime (s)\tExit Code\t\n");
   for (int i = 0; i < process_count; i++)
   {
     time_t current_time = time(NULL);
     double elapsed_time = difftime(current_time, process_list[i].start_time);
 
-    printf("%d\t\t%s\t\t%.0f\t\t%d\t\t%s\n",
+    printf("%d\t\t%s\t\t%.0f\t\t%d\t\t\n",
            process_list[i].pid,
            process_list[i].name,
            elapsed_time,
@@ -54,9 +55,9 @@ void handle_lrlist_command(Information *process_list, int process_count)
 void handle_hello_command()
 {
   pid_t pid = fork();
-  if (pid == -1)
+  if (pid < 0)
   {
-    perror("fork failed");
+    fprintf(stderr, "execvp failed");
     exit(1);
   }
   else if (pid == 0)
@@ -69,9 +70,9 @@ void handle_hello_command()
 void handle_sum_command(char *arg1, char *arg2)
 {
   pid_t pid = fork();
-  if (pid == -1)
+  if (pid < 0)
   {
-    perror("fork failed");
+    fprintf(stderr, "execvp failed");
     exit(1);
   }
   else if (pid == 0)
@@ -104,9 +105,9 @@ bool is_prime(int N)
 void handle_is_prime_command(char *arg)
 {
   pid_t pid = fork();
-  if (pid == -1)
+  if (pid < 0)
   {
-    perror("fork failed");
+    fprintf(stderr, "execvp failed");
     exit(1);
   }
   else if (pid == 0)
