@@ -3,11 +3,12 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <time.h>
 #include <stdbool.h>
 
 #include "command_handlers.h"
 
-void handle_lrexec_command(char **args)
+void handle_lrexec_command(char **args, Information *process_list, int *process_count)
 {
   pid_t pid = fork();
   if (pid == -1)
@@ -23,27 +24,31 @@ void handle_lrexec_command(char **args)
   }
   else
   {
+    process_list[*process_count].pid = pid;
+    strncpy(process_list[*process_count].name, args[0], sizeof(process_list[*process_count].name));
+    process_list[*process_count].start_time = time(NULL);
+    process_list[*process_count].exit_code = -1;
+    (*process_count)++;
     // source: https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-waitpid-wait-specific-child-process-end
     int status;
     waitpid(pid, &status, WNOHANG);
   }
 }
 
-// source: https://www.geeksforgeeks.org/c-program-to-check-whether-a-number-is-prime-or-not/
-bool is_prime(int N)
+void handle_lrlist_command(Information *process_list, int process_count)
 {
-  if (N <= 1)
+  printf("PID\t\tName\t\tTime (s)\tExit Code\tRunning\n");
+  for (int i = 0; i < process_count; i++)
   {
-    return false;
+    time_t current_time = time(NULL);
+    double elapsed_time = difftime(current_time, process_list[i].start_time);
+
+    printf("%d\t\t%s\t\t%.0f\t\t%d\t\t%s\n",
+           process_list[i].pid,
+           process_list[i].name,
+           elapsed_time,
+           process_list[i].exit_code);
   }
-  for (int i = 2; i < N; i++)
-  {
-    if (N % i == 0)
-    {
-      return false;
-    }
-  }
-  return true;
 }
 
 void handle_hello_command()
@@ -77,6 +82,23 @@ void handle_sum_command(char *arg1, char *arg2)
     printf("Result: %.2f\n", result);
     exit(0);
   }
+}
+
+// source: https://www.geeksforgeeks.org/c-program-to-check-whether-a-number-is-prime-or-not/
+bool is_prime(int N)
+{
+  if (N <= 1)
+  {
+    return false;
+  }
+  for (int i = 2; i < N; i++)
+  {
+    if (N % i == 0)
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 void handle_is_prime_command(char *arg)

@@ -8,12 +8,31 @@
 #include "../input_manager/manager.h"
 #include "command_handlers.h"
 
-// hello, sum and is_prime commands where based on SSOO youtube classes.
+Information process_list[100];
+int process_count = 0;
 
 void handle_sigchld(int sig)
 {
-  while (waitpid(-1, NULL, WNOHANG) > 0)
-    ;
+  int status;
+  pid_t pid;
+  while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
+  {
+    for (int i = 0; i < process_count; i++)
+    {
+      if (process_list[i].pid == pid)
+      {
+        if (WIFEXITED(status))
+        {
+          process_list[i].exit_code = WEXITSTATUS(status);
+        }
+        else
+        {
+          process_list[i].exit_code = -1;
+        }
+        break;
+      }
+    }
+  }
 }
 int main()
 {
@@ -27,9 +46,7 @@ int main()
   while (1)
   {
     printf("shell> ");
-
     char **tokens = read_user_input();
-
     if (tokens[0] == NULL)
     {
       free_user_input(tokens);
@@ -50,7 +67,11 @@ int main()
     }
     else if (strcmp(tokens[0], "lrexec") == 0 && tokens[1] != NULL)
     {
-      handle_lrexec_command(&tokens[1]);
+      handle_lrexec_command(&tokens[1], process_list, &process_count);
+    }
+    else if (strcmp(tokens[0], "lrlist") == 0)
+    {
+      handle_lrlist_command(process_list, process_count);
     }
     else if (strcmp(tokens[0], "exit") == 0)
     {
