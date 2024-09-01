@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "manager.h": "c",
+    "wait.h": "c",
+    "stdio.h": "c"
+  }
+}

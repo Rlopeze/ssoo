@@ -23,22 +23,24 @@ void handle_lrexec_command(char **args)
   }
   else
   {
-    wait(NULL);
+    int status;
+    waitpid(pid, &status, WNOHANG);
   }
 }
 
-bool is_prime(int num)
+// source: https://www.geeksforgeeks.org/c-program-to-check-whether-a-number-is-prime-or-not/
+bool is_prime(int N)
 {
-  if (num <= 1)
-    return false;
-  if (num == 2 || num == 3)
-    return true;
-  if (num % 2 == 0 || num % 3 == 0)
-    return false;
-  for (int i = 5; i * i <= num; i += 6)
+  if (N <= 1)
   {
-    if (num % i == 0 || num % (i + 2) == 0)
+    return false;
+  }
+  for (int i = 2; i < N; i++)
+  {
+    if (N % i == 0)
+    {
       return false;
+    }
   }
   return true;
 }
@@ -86,6 +88,7 @@ void handle_is_prime_command(char *arg)
   }
   else if (pid == 0)
   {
+    // atoi source: https://www.aprendeaprogramar.com/referencia/view.php?f=atoi&leng=C
     int num = atoi(arg);
     if (is_prime(num))
     {
