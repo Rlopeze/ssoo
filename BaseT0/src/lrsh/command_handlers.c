@@ -23,6 +23,7 @@ void handle_lrexec_command(char **args)
   }
   else
   {
+    // source: https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-waitpid-wait-specific-child-process-end
     int status;
     waitpid(pid, &status, WNOHANG);
   }

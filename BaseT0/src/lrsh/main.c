@@ -8,14 +8,16 @@
 #include "../input_manager/manager.h"
 #include "command_handlers.h"
 
+// hello, sum and is_prime commands where based on SSOO youtube classes.
+
 void handle_sigchld(int sig)
 {
   while (waitpid(-1, NULL, WNOHANG) > 0)
     ;
 }
-
 int main()
 {
+  // source: https://cboard.cprogramming.com/linux-programming/100269-reaping-zombies-sigaction.html
   struct sigaction sa;
   sa.sa_handler = &handle_sigchld;
   sigemptyset(&sa.sa_mask);
