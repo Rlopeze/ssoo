@@ -28,3 +28,26 @@ Queue *enqueue(Queue *queue, Process *process)
   queue->size++;
   return queue;
 }
+
+Process *dequeue(Queue *queue)
+{
+  if (queue->head == NULL)
+  {
+    return NULL;
+  }
+  Node *node = queue->head;
+  queue->head = queue->head->next;
+  if (queue->head == NULL)
+  {
+    queue->tail = NULL;
+  }
+  queue->size--;
+  Process *process = node->process;
+  free(node);
+  return process;
+}
+
+bool is_empty(Queue *queue)
+{
+  return queue->size == 0;
+}

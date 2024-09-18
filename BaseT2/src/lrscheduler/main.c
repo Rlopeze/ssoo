@@ -9,7 +9,7 @@ int main(int argc, char const *argv[])
 	/*Lectura del input*/
 	char *file_name = (char *)argv[1];
 
-	// TODO: change to argv[3]
+	// TODO: change to argv[3], argv[2] will be the output.csv
 	int16_t quantum = (int16_t)atoi(argv[2]);
 	InputFile *input_file = read_file(file_name);
 
@@ -27,6 +27,14 @@ int main(int argc, char const *argv[])
 				atoi(input_file->lines[i][5]));
 
 		enqueue(high_queue, process);
+	}
+	while (is_empty(high_queue) == false || is_empty(low_queue) == false)
+	{
+		// TODO: Implement the logic of the scheduler
+		// 1. Check if there are processes in the high queue
+		// 2. Get priority to execute a process from the high queue
+		// 3. If there are processes in the high queue, dequeue one and execute it
+		// 4. If there are no processes in the high queue, get priority to execute a process from the low queue
 	}
 
 	input_file_destroy(input_file);

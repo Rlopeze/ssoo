@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../process/process.h"
+#include <stdbool.h>
 
 typedef struct Node
 {
@@ -19,3 +20,7 @@ typedef struct
 Queue *create_queue(int quantum);
 
 Queue *enqueue(Queue *queue, Process *process);
+
+Process *dequeue(Queue *queue);
+
+bool is_empty(Queue *queue);
