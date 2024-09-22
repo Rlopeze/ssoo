@@ -12,5 +12,6 @@ Process *process_create(char *name, int pid, int32_t initialTime, int burstTime,
   process->ioWaitTime = ioWaitTime;
   process->deadline = deadline;
   process->state = READY;
+  process->last_cpu_tick = 0;
   return process;
 }

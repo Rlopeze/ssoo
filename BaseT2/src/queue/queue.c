@@ -59,6 +59,44 @@ Queue *enqueue_for_first_time(Process **process_list, int process_count, Queue *
   return high_queue;
 }
 
+void promote_process(Queue *low_queue, Queue *high_queue, int global_time)
+{
+  Node *prev = NULL;
+  Node *current = low_queue->head;
+
+  while (current != NULL)
+  {
+    Process *process = current->process;
+
+    if (2 * process->deadline < global_time - process->last_cpu_tick)
+    {
+      if (prev == NULL)
+      {
+        low_queue->head = current->next;
+      }
+      else
+      {
+        prev->next = current->next;
+      }
+      if (current == low_queue->tail)
+      {
+        low_queue->tail = prev;
+      }
+
+      low_queue->size--;
+      enqueue(high_queue, process);
+
+      Node *temp = current;
+      current = current->next;
+    }
+    else
+    {
+      prev = current;
+      current = current->next;
+    }
+  }
+}
+
 bool is_empty(Queue *queue)
 {
   return queue->size == 0;

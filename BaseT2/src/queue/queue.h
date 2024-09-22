@@ -25,4 +25,6 @@ Process *dequeue(Queue *queue);
 
 Queue *enqueue_for_first_time(Process **process_list, int process_count, Queue *high_queue, int global_time);
 
+void promote_process(Queue *low_queue, Queue *high_queue, int global_time);
+
 bool is_empty(Queue *queue);
