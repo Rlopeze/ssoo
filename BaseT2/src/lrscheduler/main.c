@@ -34,6 +34,10 @@ int main(int argc, char const *argv[])
 	// TODO: Implement the logic of the scheduler
 	while (true)
 	{
+		// update process state
+		change_process_state(low_queue);
+		change_process_state(high_queue);
+
 		enqueue_for_first_time(process_list, input_file->len, high_queue, global_time);
 		promote_process(low_queue, high_queue, global_time);
 

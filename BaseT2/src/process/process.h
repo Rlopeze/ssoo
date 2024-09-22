@@ -17,6 +17,7 @@ typedef struct
   int burstTime;
   int numBursts;
   int32_t ioWaitTime;
+  int32_t ioWaitTimeLeft;
   int32_t deadline;
   ProcessState state;
   int last_cpu_tick;

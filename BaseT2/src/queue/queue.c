@@ -97,6 +97,25 @@ void promote_process(Queue *low_queue, Queue *high_queue, int global_time)
   }
 }
 
+void change_process_state(Queue *queue)
+{
+  Node *current = queue->head;
+  while (current != NULL)
+  {
+    Process *process = current->process;
+    if (process->state == WAITING)
+    {
+      process->ioWaitTimeLeft--;
+      if (process->ioWaitTimeLeft == 0)
+      {
+        process->state = READY;
+        process->ioWaitTimeLeft = process->ioWaitTime;
+      }
+    }
+    current = current->next;
+  }
+}
+
 bool is_empty(Queue *queue)
 {
   return queue->size == 0;

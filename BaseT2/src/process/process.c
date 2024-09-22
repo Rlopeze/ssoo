@@ -10,6 +10,7 @@ Process *process_create(char *name, int pid, int32_t initialTime, int burstTime,
   process->burstTime = burstTime;
   process->numBursts = numBursts;
   process->ioWaitTime = ioWaitTime;
+  process->ioWaitTimeLeft = ioWaitTime;
   process->deadline = deadline;
   process->state = READY;
   process->last_cpu_tick = 0;

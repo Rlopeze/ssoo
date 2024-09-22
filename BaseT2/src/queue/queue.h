@@ -27,4 +27,6 @@ Queue *enqueue_for_first_time(Process **process_list, int process_count, Queue *
 
 void promote_process(Queue *low_queue, Queue *high_queue, int global_time);
 
+void change_process_state(Queue *queue);
+
 bool is_empty(Queue *queue);
