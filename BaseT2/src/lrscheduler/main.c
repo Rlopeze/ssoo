@@ -35,6 +35,7 @@ int main(int argc, char const *argv[])
 	while (true)
 	{
 		enqueue_for_first_time(process_list, input_file->len, high_queue, global_time);
+		promote_process(low_queue, high_queue, global_time);
 
 		global_time++;
 	}
