@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 typedef enum
 {
@@ -20,4 +21,4 @@ typedef struct
   ProcessState state;
 } Process;
 
-Process *process_create(char *name, int pid, int32_t initialTime, int burstTime, int numBursts, int ioWaitTime, int deadline);
+Process *process_create(char *name, int pid, int32_t initialTime, int burstTime, int numBursts, int32_t ioWaitTime, int32_t deadline);

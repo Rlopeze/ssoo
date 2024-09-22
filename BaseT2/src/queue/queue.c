@@ -47,7 +47,7 @@ Process *dequeue(Queue *queue)
   return process;
 }
 
-Process *enqueue_for_first_time(Process **process_list, int process_count, Queue *high_queue, int global_time)
+Queue *enqueue_for_first_time(Process **process_list, int process_count, Queue *high_queue, int global_time)
 {
   for (int i = 0; i < process_count; i++)
   {
