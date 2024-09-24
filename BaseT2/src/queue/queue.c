@@ -29,21 +29,52 @@ Queue *enqueue(Queue *queue, Process *process)
   return queue;
 }
 
-Process *dequeue(Queue *queue)
+Process *dequeue(Queue *queue, int global_time)
 {
   if (queue->head == NULL)
   {
     return NULL;
   }
-  Node *node = queue->head;
-  queue->head = queue->head->next;
-  if (queue->head == NULL)
+
+  Node *current = queue->head;
+  Node *previous = NULL;
+  Node *best_node = queue->head;
+  Node *best_previous = NULL;
+
+  while (current != NULL)
   {
-    queue->tail = NULL;
+    Process *current_process = current->process;
+    Process *best_process = best_node->process;
+
+    int current_priority = (global_time - current_process->last_cpu_tick) - current_process->deadline;
+    int best_priority = (global_time - best_process->last_cpu_tick) - best_process->deadline;
+
+    if ((current_priority > best_priority) ||
+        (current_priority == best_priority && current_process->pid < best_process->pid))
+    {
+      best_node = current;
+      best_previous = previous;
+    }
+
+    previous = current;
+    current = current->next;
+  }
+  if (best_previous != NULL)
+  {
+    best_previous->next = best_node->next;
+  }
+  else
+  {
+    queue->head = best_node->next;
+  }
+
+  if (best_node->next == NULL)
+  {
+    queue->tail = best_previous;
   }
   queue->size--;
-  Process *process = node->process;
-  free(node);
+  Process *process = best_node->process;
+  free(best_node);
   return process;
 }
 
