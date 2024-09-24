@@ -50,6 +50,7 @@ Process *dequeue(Queue *queue, int global_time)
     {
       int64_t priority_value = (global_time - process->last_cpu_tick) - process->deadline;
 
+
       if (priority_value > highest_priority_value ||
           (priority_value == highest_priority_value && process->pid < selected_node->process->pid))
       {
