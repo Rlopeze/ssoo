@@ -35,7 +35,7 @@ Process *dequeue(Queue *queue, int global_time)
   {
     return NULL;
   }
-
+  
   Node *prev = NULL;
   Node *selected_prev = NULL;
   Node *selected_node = NULL;
@@ -84,6 +84,7 @@ Process *dequeue(Queue *queue, int global_time)
   queue->size--;
   Process *process = selected_node->process;
   free(selected_node);
+
   return process;
 }
 
