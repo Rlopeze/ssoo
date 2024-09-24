@@ -29,52 +29,61 @@ Queue *enqueue(Queue *queue, Process *process)
   return queue;
 }
 
-Process *dequeue(Queue *queue, int global_time)
+Process *dequeue(Queue *queue, int current_time)
 {
   if (queue->head == NULL)
   {
     return NULL;
   }
 
+  Node *prev = NULL;
+  Node *selected_prev = NULL;
+  Node *selected_node = NULL;
   Node *current = queue->head;
-  Node *previous = NULL;
-  Node *best_node = queue->head;
-  Node *best_previous = NULL;
+  int64_t highest_priority_value = INT64_MIN;
 
   while (current != NULL)
   {
-    Process *current_process = current->process;
-    Process *best_process = best_node->process;
+    Process *process = current->process;
 
-    int current_priority = (global_time - current_process->last_cpu_tick) - current_process->deadline;
-    int best_priority = (global_time - best_process->last_cpu_tick) - best_process->deadline;
-
-    if ((current_priority > best_priority) ||
-        (current_priority == best_priority && current_process->pid < best_process->pid))
+    if (process->state != WAITING)
     {
-      best_node = current;
-      best_previous = previous;
+      int64_t priority_value = (current_time - process->last_cpu_tick) - process->deadline;
+
+      if (priority_value > highest_priority_value ||
+          (priority_value == highest_priority_value && process->pid < selected_node->process->pid))
+      {
+        selected_prev = prev;
+        selected_node = current;
+        highest_priority_value = priority_value;
+      }
     }
 
-    previous = current;
+    prev = current;
     current = current->next;
   }
-  if (best_previous != NULL)
+
+  if (selected_node == NULL)
   {
-    best_previous->next = best_node->next;
+    return NULL;
+  }
+  if (selected_prev == NULL)
+  {
+    queue->head = selected_node->next;
   }
   else
   {
-    queue->head = best_node->next;
+    selected_prev->next = selected_node->next;
   }
 
-  if (best_node->next == NULL)
+  if (selected_node == queue->tail)
   {
-    queue->tail = best_previous;
+    queue->tail = selected_prev;
   }
+
   queue->size--;
-  Process *process = best_node->process;
-  free(best_node);
+  Process *process = selected_node->process;
+  free(selected_node);
   return process;
 }
 
