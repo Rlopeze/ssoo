@@ -29,7 +29,7 @@ Queue *enqueue(Queue *queue, Process *process)
   return queue;
 }
 
-Process *dequeue(Queue *queue, int current_time)
+Process *dequeue(Queue *queue, int global_time)
 {
   if (queue->head == NULL)
   {
