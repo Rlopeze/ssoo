@@ -8,6 +8,7 @@ Process *process_create(char *name, int pid, int32_t initialTime, int burstTime,
     process->pid = pid;
     process->initialTime = initialTime;
     process->burstTime = burstTime;
+    process->actualBurstTime = burstTime;
     process->numBursts = numBursts;
     process->ioWaitTime = ioWaitTime;
     process->ioWaitTimeLeft = ioWaitTime;

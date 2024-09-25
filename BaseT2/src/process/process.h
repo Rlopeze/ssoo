@@ -15,6 +15,7 @@ typedef struct
   int pid;
   int32_t initialTime;
   int burstTime;
+  int actualBurstTime;
   int numBursts;
   int32_t ioWaitTime;
   int32_t ioWaitTimeLeft;

@@ -32,20 +32,50 @@ Queue *enqueue(Queue *queue, Process *process)
   return queue;
 }
 
-Process *dequeue(Queue *queue, int global_time)
+Process *dequeue_specific_process(Queue *queue, Process *target_process)
 {
   if (queue->head == NULL)
   {
     return NULL;
   }
-  Node *node = queue->head;
-  queue->head = queue->head->next;
-  if (queue->head == NULL)
+  Node *current = queue->head;
+  Node *previous = NULL;
+
+  while (current != NULL)
   {
-    queue->tail = NULL;
+    if (current->process == target_process)
+    {
+      if (previous == NULL)
+      {
+        queue->head = current->next;
+        if (queue->head == NULL)
+        {
+          queue->tail = NULL;
+        }
+      }
+      else
+      {
+        previous->next = current->next;
+
+        if (current->next == NULL)
+        {
+          queue->tail = previous;
+        }
+      }
+
+      queue->size--;
+
+      Process *process = current->process;
+
+      free(current);
+
+      return process;
+    }
+    previous = current;
+    current = current->next;
   }
-  queue->size--;
-  return node->process;
+
+  return NULL;
 }
 
 Queue *enqueue_for_first_time(Process **process_list, int process_count, Queue *high_queue, int global_time)
@@ -86,6 +116,8 @@ void promote_process(Queue *low_queue, Queue *high_queue, int global_time)
       }
 
       low_queue->size--;
+      // TODO: verify if this is correct
+      process->quantum = high_queue->quantum;
       enqueue(high_queue, process);
 
       Node *temp = current;
@@ -127,8 +159,6 @@ Process *select_process(Queue *queue, int global_time)
   while (current != NULL)
   {
     Process *process = current->process;
-    // printf("En queue.c process->name: %s\n", process->name);
-    // printf("En queue.c process->state: %d\n", process->state);
     if (process->state == READY)
     {
       int priority_value = (global_time - process->last_cpu_tick) - process->deadline;

@@ -44,25 +44,38 @@ Process *select_next_process(Queue *high_queue, Queue *low_queue, int global_tim
 
 Process *update_process_state(Process *running_process, Queue *low_queue, Queue *high_queue, int quantum, int global_time)
 {
-    if (global_time - running_process->last_cpu_tick >= running_process->burstTime)
+    if (running_process->actualBurstTime > 0)
     {
+        running_process->actualBurstTime--;
+        running_process->quantum--;
         running_process->numBursts--;
-        if (running_process->numBursts == 0)
+
+        if (running_process->actualBurstTime == 0)
+        {
+            running_process->actualBurstTime = running_process->burstTime;
+            if (running_process->quantum > 0)
+            {
+                running_process->state = WAITING;
+                running_process->ioWaitTimeLeft = running_process->ioWaitTime;
+            }
+            else if (running_process->quantum == 0 && running_process->numBursts > 0)
+            {
+                Process *process = dequeue_specific_process(high_queue, running_process);
+                if (process != NULL)
+                {
+                    running_process->quantum = low_queue->quantum;
+                    enqueue(low_queue, running_process);
+                }
+            }
+        }
+
+        if (running_process->numBursts <= 0 && running_process->quantum == 0)
         {
             running_process->state = FINISHED;
+            running_process->last_cpu_tick = global_time;
         }
-        else
-        {
-            running_process->state = WAITING;
-        }
-        running_process->last_cpu_tick = global_time;
     }
-    else if (global_time - running_process->last_cpu_tick >= quantum)
-    {
-        running_process->state = READY;
-        running_process->quantum = quantum;
-        running_process->last_cpu_tick = global_time;
-    }
+
     return running_process;
 }
 
@@ -103,7 +116,17 @@ int main(int argc, char const *argv[])
             Process *process = update_process_state(running_process, low_queue, high_queue, quantum, global_time);
             if (process->state == WAITING || process->state == FINISHED)
             {
+                if (process->state == FINISHED)
+                {
+                    dequeue_specific_process(high_queue, process);
+                    dequeue_specific_process(low_queue, process);
+                }
                 running_process = select_next_process(high_queue, low_queue, global_time);
+                if (running_process != NULL)
+                {
+                    running_process->state = RUNNING;
+                    running_process->last_cpu_tick = global_time;
+                }
             }
         }
 
@@ -111,7 +134,7 @@ int main(int argc, char const *argv[])
 
         promote_process(low_queue, high_queue, global_time);
 
-        // // Si no hay un proceso corriendo, seleccionar uno nuevo
+        // Si no hay un proceso corriendo, seleccionar uno nuevo
         if (running_process == NULL || running_process->state == FINISHED)
         {
             running_process = select_next_process(high_queue, low_queue, global_time);
@@ -122,23 +145,35 @@ int main(int argc, char const *argv[])
             }
         }
 
-        if (global_time == 4)
+        if (global_time <= 10)
         {
             printf("global_time: %d\n", global_time);
             printf("high_queue size: %d\n", high_queue->size);
-            printf("running_process: %s\n", running_process->name);
-            printf("running_process->state: %d\n", running_process->state);
-            printf("running_process->last_cpu_tick: %d\n", running_process->last_cpu_tick);
+            if (running_process != NULL)
+            {
+                printf("running_process name: %s\n", running_process->name);
+                printf("running_process quantum: %d\n", running_process->quantum);
+                printf("running_process->state: %d\n", running_process->state);
+                printf("running_process->numbursts: %d\n", running_process->numBursts);
+                printf("running_process->actualBurstTime: %d\n", running_process->actualBurstTime);
+                printf("running_process->burstimes: %d\n", running_process->burstTime);
+                printf("running_process->last_cpu_tick: %d\n", running_process->last_cpu_tick);
+            }
+
             Node *current = high_queue->head;
             while (current != NULL)
             {
                 Process *process = current->process;
-                printf("high_queue: %s\n", process->name);
-                printf("high_queue->state: %d\n", process->state);
+                printf("high_queue process name: %s\n", process->name);
+                printf("high_queue process state: %d\n", process->state);
+                printf("high_queue process quantum: %d\n", process->quantum);
+                printf("high_queue process numbursts: %d\n", process->numBursts);
+
                 current = current->next;
             }
-            break;
         }
+        if (global_time == 9)
+            break;
 
         bool all_finished = true;
         for (int i = 0; i < input_file->len; i++)

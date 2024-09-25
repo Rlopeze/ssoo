@@ -21,7 +21,7 @@ Queue *create_queue(int quantum);
 
 Queue *enqueue(Queue *queue, Process *process);
 
-Process *dequeue(Queue *queue, int global_time);
+Process *dequeue_specific_process(Queue *queue, Process *target_process);
 
 Queue *enqueue_for_first_time(Process **process_list, int process_count, Queue *high_queue, int global_time);
 
