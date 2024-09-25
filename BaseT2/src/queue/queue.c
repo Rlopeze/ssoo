@@ -117,9 +117,11 @@ void promote_process(Queue *low_queue, Queue *high_queue, int global_time)
       }
 
       low_queue->size--;
+      high_queue->size++;
       // TODO: verify if this is correct
       process->quantum = high_queue->quantum;
       enqueue(high_queue, process);
+      dequeue_specific_process(low_queue, process);
 
       Node *temp = current;
       current = current->next;

@@ -46,24 +46,35 @@ Process *update_process_state(Process *running_process, Queue *low_queue, Queue 
 {
     if (running_process->actualBurstTime > 0)
     {
+        // printf("\nProcess %s running at time %d\n", running_process->name, global_time);
+        // printf("Quantum: %d\n", running_process->quantum);
+        // printf("Actual Burst Time: %d\n", running_process->actualBurstTime);
         running_process->actualBurstTime--;
+        
+        printf("Process %s running at time %d\n", running_process->name, global_time);
+        // printf("Quantum: %d\n", running_process->quantum);
+        // printf("Actual Burst Time: %d\n", running_process->actualBurstTime);
+        // printf("Burst Time: %d\n", running_process->burstTime);
+        // termina una ráfaga, pasa a waiting
+
+        
         if (running_process->quantum > 0)
         {
-            running_process->quantum--;
-            if (running_process->quantum == 0)
+            // printf("Quantum: %d\n", running_process->quantum);
+            // printf("Actual Burst Time: %d\n", running_process->actualBurstTime);
+            if (running_process->quantum - 1 == 0 && running_process->actualBurstTime > 0)
             {
-                if (running_process->actualBurstTime == 0)
-                {
-                    if (running_process->numBursts > 1)
-                    {
-                        running_process->interrupciones++;
-                    }
-                }
-                else
-                {
-                    running_process->interrupciones++;
-                }
+                printf("\nSIUU\n");
+                running_process->interrupciones++;
             }
+            running_process->quantum--;
+        }
+        else if (running_process->quantum == 0 && running_process->actualBurstTime == running_process->burstTime - 1)
+        {
+            printf("\nSIUUU 2\n");
+            running_process->interrupciones++;
+            // printf("Quantum: %d\n", running_process->quantum);
+            // printf("Actual Burst Time: %d\n", running_process->actualBurstTime);
         }
 
         if (running_process->actualBurstTime == 0)
@@ -74,7 +85,14 @@ Process *update_process_state(Process *running_process, Queue *low_queue, Queue 
             running_process->ioWaitTimeLeft = running_process->ioWaitTime;
             
         }
+        if (running_process->numBursts == 0)
+        {
+            running_process->state = FINISHED;
+            printf("Process %s finished at time %d\n", running_process->name, global_time);
+            running_process->last_cpu_tick = global_time;
+        }
 
+        // termina la ejecución de todas sus ráfagas
         if (running_process->numBursts == 0 && running_process->quantum == 0)
         {
             running_process->state = FINISHED;
@@ -90,6 +108,8 @@ Process *update_process_state(Process *running_process, Queue *low_queue, Queue 
                 enqueue(low_queue, running_process);
             }
         }
+
+
     }
 
     return running_process;
@@ -173,8 +193,6 @@ int main(int argc, char const *argv[])
         //         printf("running_process->state: %d\n", running_process->state);
         //         printf("running_process->numbursts: %d\n", running_process->numBursts);
         //         printf("running_process->actualBurstTime: %d\n", running_process->actualBurstTime);
-        //         printf("running_process->burstimes: %d\n", running_process->burstTime);
-        //         printf("running_process->last_cpu_tick: %d\n", running_process->last_cpu_tick);
         //     }
 
         //     Node *current = high_queue->head;
@@ -203,9 +221,6 @@ int main(int argc, char const *argv[])
         //         current2 = current2->next;
         //     }
         // }
-        if (global_time == 17)
-            break;
-
         bool all_finished = true;
         for (int i = 0; i < input_file->len; i++)
         {
