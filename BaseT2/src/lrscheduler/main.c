@@ -160,48 +160,49 @@ int main(int argc, char const *argv[])
                 running_process->last_cpu_tick = global_time;
             }
         }
+        
 
-        if (global_time <= 17)
-        {
-            printf("\nglobal_time: %d\n", global_time);
-            printf("high_queue size: %d\n", high_queue->size);
-            if (running_process != NULL)
-            {
-                printf("running_process name: %s\n", running_process->name);
-                printf("running_process quantum: %d\n", running_process->quantum);
-                printf("running_process->state: %d\n", running_process->state);
-                printf("running_process->numbursts: %d\n", running_process->numBursts);
-                printf("running_process->actualBurstTime: %d\n", running_process->actualBurstTime);
-                printf("running_process->burstimes: %d\n", running_process->burstTime);
-                printf("running_process->last_cpu_tick: %d\n", running_process->last_cpu_tick);
-            }
+        // if (global_time <= 17)
+        // {
+        //     printf("\nglobal_time: %d\n", global_time);
+        //     printf("high_queue size: %d\n", high_queue->size);
+        //     if (running_process != NULL)
+        //     {
+        //         printf("running_process name: %s\n", running_process->name);
+        //         printf("running_process quantum: %d\n", running_process->quantum);
+        //         printf("running_process->state: %d\n", running_process->state);
+        //         printf("running_process->numbursts: %d\n", running_process->numBursts);
+        //         printf("running_process->actualBurstTime: %d\n", running_process->actualBurstTime);
+        //         printf("running_process->burstimes: %d\n", running_process->burstTime);
+        //         printf("running_process->last_cpu_tick: %d\n", running_process->last_cpu_tick);
+        //     }
 
-            Node *current = high_queue->head;
-            while (current != NULL)
-            {
-                Process *process = current->process;
-                printf("high_queue process name: %s\n", process->name);
-                printf("high_queue process state: %d\n", process->state);
-                printf("high_queue process quantum: %d\n", process->quantum);
-                printf("high_queue process numbursts: %d\n", process->numBursts);
-                printf("high_queue process actualBurstTime: %d\n", process->actualBurstTime);
+        //     Node *current = high_queue->head;
+        //     while (current != NULL)
+        //     {
+        //         Process *process = current->process;
+        //         printf("high_queue process name: %s\n", process->name);
+        //         printf("high_queue process state: %d\n", process->state);
+        //         printf("high_queue process quantum: %d\n", process->quantum);
+        //         printf("high_queue process numbursts: %d\n", process->numBursts);
+        //         printf("high_queue process actualBurstTime: %d\n", process->actualBurstTime);
 
-                current = current->next;
-            }
+        //         current = current->next;
+        //     }
             
-            Node *current2 = low_queue->head;
-            while (current2 != NULL)
-            {
-                Process *process = current2->process;
-                printf("low_queue process name: %s\n", process->name);
-                printf("low_queue process state: %d\n", process->state);
-                printf("low_queue process quantum: %d\n", process->quantum);
-                printf("low_queue process numbursts: %d\n", process->numBursts);
-                printf("low_queue process actualBurstTime: %d\n", process->actualBurstTime);
+        //     Node *current2 = low_queue->head;
+        //     while (current2 != NULL)
+        //     {
+        //         Process *process = current2->process;
+        //         printf("low_queue process name: %s\n", process->name);
+        //         printf("low_queue process state: %d\n", process->state);
+        //         printf("low_queue process quantum: %d\n", process->quantum);
+        //         printf("low_queue process numbursts: %d\n", process->numBursts);
+        //         printf("low_queue process actualBurstTime: %d\n", process->actualBurstTime);
 
-                current2 = current2->next;
-            }
-        }
+        //         current2 = current2->next;
+        //     }
+        // }
         if (global_time == 17)
             break;
 
