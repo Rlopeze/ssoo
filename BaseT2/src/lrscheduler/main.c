@@ -58,7 +58,7 @@ Process *update_process_state(Process *running_process, Queue *low_queue, Queue 
                 running_process->state = WAITING;
                 running_process->ioWaitTimeLeft = running_process->ioWaitTime;
             }
-            else if (running_process->quantum == 0 && running_process->numBursts > 0)
+            if (running_process->quantum == 0 && running_process->numBursts > 0)
             {
                 Process *process = dequeue_specific_process(high_queue, running_process);
                 if (process != NULL)
@@ -145,7 +145,7 @@ int main(int argc, char const *argv[])
             }
         }
 
-        if (global_time <= 10)
+        if (global_time <= 17)
         {
             printf("global_time: %d\n", global_time);
             printf("high_queue size: %d\n", high_queue->size);
@@ -168,11 +168,12 @@ int main(int argc, char const *argv[])
                 printf("high_queue process state: %d\n", process->state);
                 printf("high_queue process quantum: %d\n", process->quantum);
                 printf("high_queue process numbursts: %d\n", process->numBursts);
+                printf("high_queue process actualBurstTime: %d\n", process->actualBurstTime);
 
                 current = current->next;
             }
         }
-        if (global_time == 9)
+        if (global_time == 17)
             break;
 
         bool all_finished = true;
