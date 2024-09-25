@@ -18,25 +18,58 @@ Process* select_next_process(Queue *high_queue, Queue *low_queue) {
     return NULL;
 }
 
-// Añadir esta función para gestionar el cambio de estado y mover el proceso entre colas
+void write_output_file(char *filename, Process **process_list, int process_count) {
+    FILE *file = fopen(filename, "w");
+
+    // Escribir los encabezados del archivo CSV
+    fprintf(file, "nombre_proceso,pid,interrupciones,turnaround,response,waiting,suma_deadline\n");
+
+    // Recorrer cada proceso y escribir sus estadísticas
+    for (int i = 0; i < process_count; i++) {
+        Process *process = process_list[i];
+        
+        // Calcular estadísticas para cada proceso
+        int interrupciones = process->interrupciones; // Ajusta según tu lógica
+        int turnaround = process->last_cpu_tick - process->initialTime; // Turnaround time
+        int response = process->response_time; // Tiempo de respuesta (el primer tick de CPU)
+        int waiting = process->waiting_time; // Tiempo de espera
+        int suma_deadline = process->suma_deadline; // Tiempo ejecutado después del deadline
+
+        // Escribir las estadísticas del proceso
+        fprintf(file, "%s,%d,%d,%d,%d,%d,%d\n",
+                process->name, process->pid, interrupciones, turnaround, response, waiting, suma_deadline);
+    }
+
+    // Cerrar el archivo
+    fclose(file);
+}
+
+
 void update_process_state(Process *running_process, Queue *low_queue, Queue *high_queue, int quantum, int global_time) {
     // Si el proceso ha consumido todo su quantum o ha terminado la ráfaga
     if (global_time - running_process->last_cpu_tick >= running_process->burstTime) {
-		// Reducir el número de ráfagas restantes
+        // Reducir el número de ráfagas restantes
         running_process->numBursts--; 
         if (running_process->numBursts == 0) {
-			// Si no quedan ráfagas, el proceso ha terminado
+            // Si no quedan ráfagas, el proceso ha terminado
             running_process->state = FINISHED; 
         } else {
-			// De lo contrario, entra en WAITING (espera I/O)
-            running_process->state = WAITING; 
-			// Moverlo a la cola de baja prioridad (si es necesario)
-            enqueue(low_queue, running_process); 
+            // El proceso aún tiene ráfagas, ver si debe moverse a WAITING o continuar ejecutando
+            running_process->state = WAITING;
+            enqueue(low_queue, running_process);  // Moverlo a la cola baja si está en WAITING
         }
-		// Actualizar el último tick de CPU
+        // Actualizar el último tick de CPU
         running_process->last_cpu_tick = global_time; 
+    } else if (global_time - running_process->last_cpu_tick >= quantum) {
+        // Si el proceso ha consumido todo su quantum, pasarlo a la cola de baja prioridad
+        enqueue(low_queue, running_process);
+        running_process->state = READY;
+
+        // Reiniciar el quantum al de la cola low
+        running_process->quantum = quantum;
     }
 }
+
 
 
 int main(int argc, char const *argv[])
@@ -63,7 +96,8 @@ int main(int argc, char const *argv[])
                 atoi(input_file->lines[i][3]),
                 atoi(input_file->lines[i][4]),
                 atoi(input_file->lines[i][5]),
-                atoi(input_file->lines[i][6]));
+                atoi(input_file->lines[i][6]),
+                quantum);
     }
 
     Process *running_process = NULL; // Proceso en ejecución
@@ -73,6 +107,22 @@ int main(int argc, char const *argv[])
         // Actualizar procesos que hayan terminado IO_WAIT y pasarlos a READY
         change_process_state(low_queue);
         change_process_state(high_queue);
+
+        // Si hay un proceso en ejecución, verificar su estado y actualizar
+        if (running_process != NULL && running_process->state == RUNNING) {
+            update_process_state(running_process, low_queue, high_queue, quantum, global_time);
+
+            // Si el proceso consumió todo su quantum y sigue activo, reingresarlo a la cola
+            if (running_process->state == READY) {
+                // Se reingresa a la cola baja si terminó el quantum
+                enqueue(low_queue, running_process); 
+                // Ya no está ejecutándose
+                running_process = NULL;  
+            } else if (running_process->state == FINISHED) {
+                 // El proceso ha finalizado
+                running_process = NULL; 
+            }
+        }
 
         // Encolar los procesos que inician en este tick
         enqueue_for_first_time(process_list, input_file->len, high_queue, global_time);
@@ -87,11 +137,6 @@ int main(int argc, char const *argv[])
                 running_process->state = RUNNING;
                 running_process->last_cpu_tick = global_time;
             }
-        }
-
-        // Si hay un proceso en ejecución, verificar su estado y actualizar
-        if (running_process != NULL && running_process->state == RUNNING) {
-            update_process_state(running_process, low_queue, high_queue, quantum, global_time);
         }
 
         // Terminar cuando todos los procesos hayan finalizado
@@ -115,28 +160,3 @@ int main(int argc, char const *argv[])
     free(process_list);
 }
 
-void write_output_file(char *filename, Process **process_list, int process_count) {
-    FILE *file = fopen(filename, "w");
-
-    // Escribir los encabezados del archivo CSV
-    fprintf(file, "nombre_proceso,pid,interrupciones,turnaround,response,waiting,suma_deadline\n");
-
-    // Recorrer cada proceso y escribir sus estadísticas
-    for (int i = 0; i < process_count; i++) {
-        Process *process = process_list[i];
-        
-        // Calcular estadísticas para cada proceso
-        int interrupciones = process->interrupciones; // Ajusta según tu lógica
-        int turnaround = process->last_cpu_tick - process->initialTime; // Turnaround time
-        int response = process->response_time; // Tiempo de respuesta (el primer tick de CPU)
-        int waiting = process->waiting_time; // Tiempo de espera
-        int suma_deadline = process->suma_deadline; // Tiempo ejecutado después del deadline
-
-        // Escribir las estadísticas del proceso
-        fprintf(file, "%s,%d,%d,%d,%d,%d,%d\n",
-                process->name, process->pid, interrupciones, turnaround, response, waiting, suma_deadline);
-    }
-
-    // Cerrar el archivo
-    fclose(file);
-}

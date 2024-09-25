@@ -1,7 +1,7 @@
 #include "process.h"
 #include <stdlib.h>
 
-Process *process_create(char *name, int pid, int32_t initialTime, int burstTime, int numBursts, int ioWaitTime, int deadline)
+Process *process_create(char *name, int pid, int32_t initialTime, int burstTime, int numBursts, int ioWaitTime, int deadline, int quantum)
 {
     Process *process = (Process *)malloc(sizeof(Process));
     process->name = name;
@@ -18,5 +18,6 @@ Process *process_create(char *name, int pid, int32_t initialTime, int burstTime,
     process->response_time = 0;
     process->waiting_time = 0;
     process->suma_deadline = 0;
+    process->quantum = quantum;
     return process;
 }
