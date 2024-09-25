@@ -29,4 +29,6 @@ void promote_process(Queue *low_queue, Queue *high_queue, int global_time);
 
 void change_process_state(Queue *queue);
 
+Process *select_process(Queue *queue, int global_time);
+
 bool is_empty(Queue *queue);

@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include "queue.h"
+#include <limits.h>
+#include <stdio.h>  // FILE, fopen, fclose, etc.
+#include <stdlib.h> // malloc, calloc, free, etc
 
 Queue *create_queue(int quantum)
 {
@@ -35,58 +38,14 @@ Process *dequeue(Queue *queue, int global_time)
   {
     return NULL;
   }
-  
-  Node *prev = NULL;
-  Node *selected_prev = NULL;
-  Node *selected_node = NULL;
-  Node *current = queue->head;
-  int64_t highest_priority_value = INT64_MIN;
-
-  while (current != NULL)
+  Node *node = queue->head;
+  queue->head = queue->head->next;
+  if (queue->head == NULL)
   {
-    Process *process = current->process;
-
-    if (process->state != WAITING)
-    {
-      int64_t priority_value = (global_time - process->last_cpu_tick) - process->deadline;
-
-
-      if (priority_value > highest_priority_value ||
-          (priority_value == highest_priority_value && process->pid < selected_node->process->pid))
-      {
-        selected_prev = prev;
-        selected_node = current;
-        highest_priority_value = priority_value;
-      }
-    }
-
-    prev = current;
-    current = current->next;
+    queue->tail = NULL;
   }
-
-  if (selected_node == NULL)
-  {
-    return NULL;
-  }
-  if (selected_prev == NULL)
-  {
-    queue->head = selected_node->next;
-  }
-  else
-  {
-    selected_prev->next = selected_node->next;
-  }
-
-  if (selected_node == queue->tail)
-  {
-    queue->tail = selected_prev;
-  }
-
   queue->size--;
-  Process *process = selected_node->process;
-  free(selected_node);
-
-  return process;
+  return node->process;
 }
 
 Queue *enqueue_for_first_time(Process **process_list, int process_count, Queue *high_queue, int global_time)
@@ -95,6 +54,7 @@ Queue *enqueue_for_first_time(Process **process_list, int process_count, Queue *
   {
     if (process_list[i]->initialTime == global_time)
     {
+      process_list[i]->quantum = high_queue->quantum;
       high_queue = enqueue(high_queue, process_list[i]);
     }
   }
@@ -156,6 +116,38 @@ void change_process_state(Queue *queue)
     }
     current = current->next;
   }
+}
+
+Process *select_process(Queue *queue, int global_time)
+{
+  Node *current = queue->head;
+  Process *selected_process = NULL;
+  int max_priority = INT_MIN;
+
+  while (current != NULL)
+  {
+    Process *process = current->process;
+    // printf("En queue.c process->name: %s\n", process->name);
+    // printf("En queue.c process->state: %d\n", process->state);
+    if (process->state == READY)
+    {
+      int priority_value = (global_time - process->last_cpu_tick) - process->deadline;
+
+      if (priority_value > max_priority)
+      {
+        max_priority = priority_value;
+        selected_process = process;
+      }
+      else if (priority_value == max_priority && process->pid < selected_process->pid)
+      {
+        selected_process = process;
+      }
+    }
+
+    current = current->next;
+  }
+
+  return selected_process;
 }
 
 bool is_empty(Queue *queue)

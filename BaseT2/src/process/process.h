@@ -21,10 +21,10 @@ typedef struct
   int32_t deadline;
   ProcessState state;
   int last_cpu_tick;
-  int interrupciones; 
-  int response_time;   
-  int waiting_time;   
-  int suma_deadline;  
+  int interrupciones;
+  int response_time;
+  int waiting_time;
+  int suma_deadline;
   int quantum;
 } Process;
 
