@@ -48,31 +48,34 @@ Process *update_process_state(Process *running_process, Queue *low_queue, Queue 
     {
         running_process->actualBurstTime--;
         running_process->quantum--;
-        running_process->numBursts--;
+        if (running_process->quantum < 0)
+        {
+            running_process->quantum = 0;
+        }
 
         if (running_process->actualBurstTime == 0)
         {
+            running_process->numBursts--;
             running_process->actualBurstTime = running_process->burstTime;
-            if (running_process->quantum > 0)
-            {
-                running_process->state = WAITING;
-                running_process->ioWaitTimeLeft = running_process->ioWaitTime;
-            }
-            if (running_process->quantum == 0 && running_process->numBursts > 0)
-            {
-                Process *process = dequeue_specific_process(high_queue, running_process);
-                if (process != NULL)
-                {
-                    running_process->quantum = low_queue->quantum;
-                    enqueue(low_queue, running_process);
-                }
-            }
+            running_process->state = WAITING;
+            running_process->ioWaitTimeLeft = running_process->ioWaitTime;
+            
         }
 
-        if (running_process->numBursts <= 0 && running_process->quantum == 0)
+        if (running_process->numBursts == 0 && running_process->quantum == 0)
         {
             running_process->state = FINISHED;
+            printf("Process %s finished at time %d\n", running_process->name, global_time);
             running_process->last_cpu_tick = global_time;
+        }
+        else if (running_process->quantum == 0)
+        {
+            Process *process = dequeue_specific_process(high_queue, running_process);
+            if (process != NULL)
+            {
+                running_process->quantum = low_queue->quantum;
+                enqueue(low_queue, running_process);
+            }
         }
     }
 
@@ -147,7 +150,7 @@ int main(int argc, char const *argv[])
 
         if (global_time <= 17)
         {
-            printf("global_time: %d\n", global_time);
+            printf("\nglobal_time: %d\n", global_time);
             printf("high_queue size: %d\n", high_queue->size);
             if (running_process != NULL)
             {
@@ -171,6 +174,19 @@ int main(int argc, char const *argv[])
                 printf("high_queue process actualBurstTime: %d\n", process->actualBurstTime);
 
                 current = current->next;
+            }
+            
+            Node *current2 = low_queue->head;
+            while (current2 != NULL)
+            {
+                Process *process = current2->process;
+                printf("low_queue process name: %s\n", process->name);
+                printf("low_queue process state: %d\n", process->state);
+                printf("low_queue process quantum: %d\n", process->quantum);
+                printf("low_queue process numbursts: %d\n", process->numBursts);
+                printf("low_queue process actualBurstTime: %d\n", process->actualBurstTime);
+
+                current2 = current2->next;
             }
         }
         if (global_time == 17)

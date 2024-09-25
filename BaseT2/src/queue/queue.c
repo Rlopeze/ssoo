@@ -10,6 +10,7 @@ Queue *create_queue(int quantum)
   q->head = NULL;
   q->tail = NULL;
   q->quantum = quantum;
+  q->size = 0;
   return q;
 }
 
