@@ -29,21 +29,63 @@ Queue *enqueue(Queue *queue, Process *process)
   return queue;
 }
 
-Process *dequeue(Queue *queue)
+Process *dequeue(Queue *queue, int global_time)
 {
   if (queue->head == NULL)
   {
     return NULL;
   }
-  Node *node = queue->head;
-  queue->head = queue->head->next;
-  if (queue->head == NULL)
+  
+  Node *prev = NULL;
+  Node *selected_prev = NULL;
+  Node *selected_node = NULL;
+  Node *current = queue->head;
+  int64_t highest_priority_value = INT64_MIN;
+
+  while (current != NULL)
   {
-    queue->tail = NULL;
+    Process *process = current->process;
+
+    if (process->state != WAITING)
+    {
+      int64_t priority_value = (global_time - process->last_cpu_tick) - process->deadline;
+
+
+      if (priority_value > highest_priority_value ||
+          (priority_value == highest_priority_value && process->pid < selected_node->process->pid))
+      {
+        selected_prev = prev;
+        selected_node = current;
+        highest_priority_value = priority_value;
+      }
+    }
+
+    prev = current;
+    current = current->next;
   }
+
+  if (selected_node == NULL)
+  {
+    return NULL;
+  }
+  if (selected_prev == NULL)
+  {
+    queue->head = selected_node->next;
+  }
+  else
+  {
+    selected_prev->next = selected_node->next;
+  }
+
+  if (selected_node == queue->tail)
+  {
+    queue->tail = selected_prev;
+  }
+
   queue->size--;
-  Process *process = node->process;
-  free(node);
+  Process *process = selected_node->process;
+  free(selected_node);
+
   return process;
 }
 
