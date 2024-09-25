@@ -20,5 +20,9 @@ Process *process_create(char *name, int pid, int32_t initialTime, int burstTime,
     process->waiting_time = 0;
     process->suma_deadline = 0;
     process->quantum = quantum;
+
+    process->has_enter_cpu_first_time = 0;
+    process->has_left_cpu_first_time = 0;
+
     return process;
 }

@@ -144,18 +144,18 @@ void change_process_state(Queue *queue)
     {
       process->waiting_time++;
     }
-    
+
     if (process->state == WAITING)
     {
       process->ioWaitTimeLeft--;
       process->waiting_time++;
-      if (process->ioWaitTimeLeft == 0)
+      if (process->ioWaitTimeLeft <= 0)
       {
         process->state = READY;
         process->ioWaitTimeLeft = process->ioWaitTime;
       }
     }
-    
+
     current = current->next;
   }
 }
