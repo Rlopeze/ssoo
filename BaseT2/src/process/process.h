@@ -25,6 +25,7 @@ typedef struct
   int response_time;   
   int waiting_time;   
   int suma_deadline;  
+  int quantum;
 } Process;
 
-Process *process_create(char *name, int pid, int32_t initialTime, int burstTime, int numBursts, int32_t ioWaitTime, int32_t deadline);
+Process *process_create(char *name, int pid, int32_t initialTime, int burstTime, int numBursts, int32_t ioWaitTime, int32_t deadline, int32_t quantum);
