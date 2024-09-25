@@ -47,10 +47,23 @@ Process *update_process_state(Process *running_process, Queue *low_queue, Queue 
     if (running_process->actualBurstTime > 0)
     {
         running_process->actualBurstTime--;
-        running_process->quantum--;
-        if (running_process->quantum < 0)
+        if (running_process->quantum > 0)
         {
-            running_process->quantum = 0;
+            running_process->quantum--;
+            if (running_process->quantum == 0)
+            {
+                if (running_process->actualBurstTime == 0)
+                {
+                    if (running_process->numBursts > 1)
+                    {
+                        running_process->interrupciones++;
+                    }
+                }
+                else
+                {
+                    running_process->interrupciones++;
+                }
+            }
         }
 
         if (running_process->actualBurstTime == 0)
