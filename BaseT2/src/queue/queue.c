@@ -156,9 +156,6 @@ void change_process_state(Queue *queue)
       }
     }
 
-    printf("process->name: %s\n", process->name);
-    printf("process->state: %d\n", process->state);
-    
     current = current->next;
   }
 }
@@ -175,10 +172,9 @@ Process *select_process(Queue *queue, int global_time)
     if (process->state == READY)
     {
       int priority_value = (global_time - process->last_cpu_tick) - process->deadline;
-
       if (priority_value < 0)
       {
-        priority_value = 0;
+        priority_value = -priority_value;
       }
 
       if (priority_value < max_priority)
