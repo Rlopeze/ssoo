@@ -144,7 +144,7 @@ void change_process_state(Queue *queue)
     {
       process->waiting_time++;
     }
-
+    
     if (process->state == WAITING)
     {
       process->ioWaitTimeLeft--;
@@ -156,6 +156,9 @@ void change_process_state(Queue *queue)
       }
     }
 
+    printf("process->name: %s\n", process->name);
+    printf("process->state: %d\n", process->state);
+    
     current = current->next;
   }
 }
@@ -164,7 +167,7 @@ Process *select_process(Queue *queue, int global_time)
 {
   Node *current = queue->head;
   Process *selected_process = NULL;
-  int max_priority = INT_MIN;
+  int max_priority = INT_MAX;
 
   while (current != NULL)
   {
@@ -173,7 +176,12 @@ Process *select_process(Queue *queue, int global_time)
     {
       int priority_value = (global_time - process->last_cpu_tick) - process->deadline;
 
-      if (priority_value > max_priority)
+      if (priority_value < 0)
+      {
+        priority_value = 0;
+      }
+
+      if (priority_value < max_priority)
       {
         max_priority = priority_value;
         selected_process = process;

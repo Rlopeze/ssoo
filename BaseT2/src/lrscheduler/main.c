@@ -63,10 +63,19 @@ Process *update_process_state(Process *running_process, Queue *low_queue, Queue 
 
         if (running_process->actualBurstTime == 0)
         {
-            running_process->numBursts--;
-            running_process->actualBurstTime = running_process->burstTime;
-            running_process->state = WAITING;
-            running_process->ioWaitTimeLeft = running_process->ioWaitTime;
+            // if (running_process->ioWaitTime > 0)
+            // {
+                running_process->numBursts--;
+                running_process->actualBurstTime = running_process->burstTime;
+                running_process->state = WAITING;
+                running_process->ioWaitTimeLeft = running_process->ioWaitTime;
+            // }
+            // else
+            // {
+            //     running_process->numBursts--;
+            //     running_process->actualBurstTime = running_process->burstTime;
+            //     running_process->state = READY;
+            // }
         }
         if (running_process->numBursts == 0)
         {
@@ -168,6 +177,34 @@ int main(int argc, char const *argv[])
                 running_process->state = RUNNING;
                 running_process->last_cpu_tick = global_time;
             }
+        }
+
+         if (global_time <= 22)
+        {
+            printf("\nglobal_time: %d\n", global_time);
+            printf("high_queue size: %d\n", high_queue->size);
+            if (running_process != NULL)
+            {
+                printf("running_process name: %s\n", running_process->name);
+                printf("running_process quantum: %d\n", running_process->quantum);
+                printf("running_process->state: %d\n", running_process->state);
+                printf("running_process->numbursts: %d\n", running_process->numBursts);
+                printf("running_process->actualBurstTime: %d\n", running_process->actualBurstTime);
+            }
+
+            Node *current = high_queue->head;
+            while (current != NULL)
+            {
+                Process *process = current->process;
+                printf("high_queue process name: %s\n", process->name);
+                printf("high_queue process state: %d\n", process->state);
+                printf("high_queue process quantum: %d\n", process->quantum);
+                printf("high_queue process numbursts: %d\n", process->numBursts);
+                printf("high_queue process actualBurstTime: %d\n", process->actualBurstTime);
+
+                current = current->next;
+            }
+
         }
 
         bool all_finished = true;
