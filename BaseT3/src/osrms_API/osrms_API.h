@@ -17,6 +17,9 @@ typedef struct
   FileEntry file_table[5];
 } PCB;
 
+void read_pcb(FILE *file, int index, PCB *pcb);
+int find_process_offset(FILE *file, int process_id);
+
 void os_mount(char *memory_path);
 
 void os_ls_processes();
