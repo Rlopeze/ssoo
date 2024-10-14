@@ -1,6 +1,8 @@
 #pragma once
 #include "../osrms_File/Osrms_File.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 typedef struct
 {
   uint8_t valid;

@@ -5,7 +5,6 @@
 #include "osrms_API.h"
 
 char *path;
-
 void read_pcb(FILE *file, int index, PCB *pcb)
 {
   int offset = index * 256;
