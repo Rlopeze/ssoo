@@ -35,3 +35,55 @@ void os_ls_processes()
   }
   fclose(file);
 }
+
+int find_process_offset(FILE *file, int process_id)
+{
+  unsigned char current_process_id;
+
+  for (int i = 0; i < 32; i++)
+  {
+    int offset = i * 256;
+    fseek(file, offset, SEEK_SET);
+
+    fseek(file, offset + 1, SEEK_SET);
+    fread(&current_process_id, sizeof(unsigned char), 1, file);
+
+    if ((int)current_process_id == process_id)
+    {
+      return offset;
+    }
+  }
+  return -1;
+}
+
+int os_exists(int process_id, char *file_name)
+{
+  FILE *file = fopen(path, "rb");
+
+  int process_offset = find_process_offset(file, process_id);
+  if (process_offset == -1)
+  {
+    fclose(file);
+    return 0;
+  }
+
+  for (int j = 0; j < 5; j++)
+  {
+    unsigned char valid_file;
+    fseek(file, process_offset + 13 + j * 23, SEEK_SET);
+    fread(&valid_file, sizeof(unsigned char), 1, file);
+    if (valid_file)
+    {
+      unsigned char file_name_read[14];
+      fread(file_name_read, sizeof(unsigned char), 14, file);
+      if (strcmp(file_name, file_name_read) == 0)
+      {
+        fclose(file);
+        return 1;
+      }
+    }
+  }
+
+  fclose(file);
+  return 0;
+}

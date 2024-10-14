@@ -1,6 +1,17 @@
 #pragma once
 #include "../osrms_File/Osrms_File.h"
 
+typedef struct
+{
+  unsigned char state;
+  unsigned char process_id;
+  char process_name[11];
+  unsigned char valid[5];
+  char file_name[5][14];
+  unsigned int file_size[5];
+  unsigned int virtual_address[5];
+} PCB;
+
 void os_mount(char *memory_path);
 
 void os_ls_processes();
