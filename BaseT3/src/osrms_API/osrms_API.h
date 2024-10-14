@@ -3,13 +3,18 @@
 
 typedef struct
 {
-  unsigned char state;
-  unsigned char process_id;
+  uint8_t valid;
+  char file_name[14];
+  uint8_t size_bytes[4];
+  uint8_t address_bytes[4];
+} FileEntry;
+
+typedef struct
+{
+  uint8_t state;
+  uint8_t process_id;
   char process_name[11];
-  unsigned char valid[5];
-  char file_name[5][14];
-  unsigned int file_size[5];
-  unsigned int virtual_address[5];
+  FileEntry file_table[5];
 } PCB;
 
 void os_mount(char *memory_path);
