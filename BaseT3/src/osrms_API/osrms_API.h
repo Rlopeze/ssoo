@@ -21,6 +21,7 @@ typedef struct
 
 void read_pcb(FILE *file, int index, PCB *pcb);
 int find_process_offset(FILE *file, int process_id);
+uint32_t obtain_physical_address(uint32_t frame_number, uint16_t offset);
 
 void os_mount(char *memory_path);
 

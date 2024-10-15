@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "osrms_API.h"
+#include "../osrms_File/Osrms_File.h"
 
 char *path;
 void read_pcb(FILE *file, int index, PCB *pcb)
@@ -24,6 +25,32 @@ int find_process_offset(FILE *file, int process_id)
     }
   }
   return -1;
+}
+
+uint32_t obtain_physical_address(uint32_t frame_number, uint16_t offset)
+{
+
+  uint32_t base_frames = (8 * 1024) + 128 + (128 * 1024) + (8 * 1024);
+  return base_frames + (frame_number * 32768) + offset;
+}
+
+uint32_t obtain_pfn(uint16_t vpn)
+{
+  uint8_t first_level_index = vpn >> 6;
+  uint8_t second_level_index = vpn & 0x3F;
+
+  uint32_t table_address = 8 * 1024 + 128 + (first_level_index * 128);
+
+  uint32_t entry_address = table_address + (second_level_index * 2);
+
+  FILE *mem_file = fopen(path, "rb");
+
+  fseek(mem_file, entry_address, SEEK_SET);
+  uint16_t pfn;
+  fread(&pfn, 8 * 1024 + 128, 1, mem_file);
+  fclose(mem_file);
+
+  return pfn;
 }
 
 void os_mount(char *memory_path)
@@ -108,4 +135,44 @@ void os_ls_files(int process_id)
     }
   }
   fclose(file);
+}
+
+int os_read_file(osrmsFile *file_desc, char *dest_path)
+{
+  FILE *mem_file = fopen(path, "rb");
+
+  FILE *dest_file = fopen(dest_path, "wb");
+
+  int total_bytes_read = 0;
+  uint32_t virtual_addr = file_desc->virtual_address;
+  uint32_t size = file_desc->size;
+
+  while (total_bytes_read < size)
+  {
+    uint16_t vpn = (virtual_addr & 0xFFF000) >> 15;
+    uint16_t offset = virtual_addr & 0x7FFF;
+
+    uint32_t frame_number = obtain_pfn(vpn);
+
+    uint32_t frame_pos = obtain_physical_address(frame_number, offset);
+
+    fseek(mem_file, frame_pos, SEEK_SET);
+
+    int bytes_to_read = 32768 - offset;
+    if (bytes_to_read > (size - total_bytes_read))
+    {
+      bytes_to_read = size - total_bytes_read;
+    }
+
+    char buffer[32768];
+    fread(buffer, 1, bytes_to_read, mem_file);
+    fwrite(buffer, 1, bytes_to_read, dest_file);
+
+    total_bytes_read += bytes_to_read;
+    virtual_addr += bytes_to_read;
+  }
+
+  fclose(mem_file);
+  fclose(dest_file);
+  return total_bytes_read;
 }
