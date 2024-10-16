@@ -34,3 +34,5 @@ void os_ls_files(int process_id);
 void os_frame_bitmap();
 
 void os_tp_bitmap();
+
+void os_close(osrmsFile *file_desc);

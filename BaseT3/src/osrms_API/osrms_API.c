@@ -176,3 +176,8 @@ int os_read_file(osrmsFile *file_desc, char *dest_path)
   fclose(dest_file);
   return total_bytes_read;
 }
+
+void os_close(osrmsFile *file_desc)
+{
+  free(file_desc);
+}
