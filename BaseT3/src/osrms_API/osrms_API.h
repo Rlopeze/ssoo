@@ -35,4 +35,8 @@ void os_frame_bitmap();
 
 void os_tp_bitmap();
 
+void os_start_process(int process_id, char *process_name);
+
+void os_finish_process(int process_id);
+
 void os_close(osrmsFile *file_desc);
